@@ -1,34 +1,28 @@
-package com.abdimaalik.clinic.domain;
+package com.abdimaalik.clinic.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Appointment {
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
 
-    private UUID id;
+public class AppointmentDTO {
+
+    @NotNull
     private UUID patientId;
+
+    @NotNull
     private UUID clinicianId;
+
+    @NotNull
+    @Future
     private LocalDateTime startTime;
+
+    @NotNull
+    @Future
     private LocalDateTime endTime;
 
-    public Appointment() {
-    }
-
-    public Appointment(UUID id, UUID patientId, UUID clinicianId, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
-        this.patientId = patientId;
-        this.clinicianId = clinicianId;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public AppointmentDTO() {}
 
     public UUID getPatientId() {
         return patientId;
