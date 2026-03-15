@@ -17,14 +17,16 @@ public class ClinicService {
 
     private final Map<UUID, Appointment> appointments = new HashMap<>();
 
-    public Appointment createAppointment(AppointmentDTO request) {
-        Appointment appointment = new Appointment();
-        appointment.setPatientId(request.getPatientId());
-        appointment.setClinicianId(request.getClinicianId());
-        appointment.setStartTime(request.getStartTime());
-        appointment.setEndTime(request.getEndTime());
+    public Appointment createAppointment(AppointmentDTO dto) {
+        validateAppointment(dto);
 
-        validateAppointment(appointment);
+        Appointment appointment = new Appointment(
+                dto.getPatientId(),
+                dto.getClinicianId(),
+                dto.getStartTime(),
+                dto.getEndTime()
+        );
+
         ensureNoOverlap(appointment);
 
         UUID id = UUID.randomUUID();
@@ -46,39 +48,38 @@ public class ClinicService {
         appointments.remove(id);
     }
 
-    private void validateAppointment(Appointment appointment) {
-        if (appointment == null) {
-            throw new IllegalArgumentException("Appointment must not be null.");
+    private void validateAppointment(AppointmentDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("Appointment data must not be null.");
         }
 
-        if (appointment.getPatientId() == null) {
-            throw new IllegalArgumentException("Patient ID is required.");
+        if (dto.getPatientId() == null) {
+            throw new IllegalArgumentException("Patient ID must not be null.");
         }
 
-        if (appointment.getClinicianId() == null) {
-            throw new IllegalArgumentException("Clinician ID is required.");
+        if (dto.getClinicianId() == null) {
+            throw new IllegalArgumentException("Clinician ID must not be null.");
         }
 
-        if (appointment.getStartTime() == null || appointment.getEndTime() == null) {
-            throw new IllegalArgumentException("Start time and end time are required.");
+        if (dto.getStartTime() == null || dto.getEndTime() == null) {
+            throw new IllegalArgumentException("Start time and end time must not be null.");
         }
 
-        if (!appointment.getEndTime().isAfter(appointment.getStartTime())) {
+        if (!dto.getEndTime().isAfter(dto.getStartTime())) {
             throw new IllegalArgumentException("End time must be after start time.");
         }
     }
 
     private void ensureNoOverlap(Appointment newAppointment) {
-        for (Appointment existingAppointment : appointments.values()) {
-            boolean sameClinician =
-                    existingAppointment.getClinicianId().equals(newAppointment.getClinicianId());
+        for (Appointment existing : appointments.values()) {
+            boolean sameClinician = existing.getClinicianId().equals(newAppointment.getClinicianId());
 
             boolean overlaps =
-                    newAppointment.getStartTime().isBefore(existingAppointment.getEndTime()) &&
-                    newAppointment.getEndTime().isAfter(existingAppointment.getStartTime());
+                    newAppointment.getStartTime().isBefore(existing.getEndTime()) &&
+                    newAppointment.getEndTime().isAfter(existing.getStartTime());
 
             if (sameClinician && overlaps) {
-                throw new IllegalArgumentException("Clinician is already booked during that time.");
+                throw new IllegalArgumentException("Clinician already has an overlapping appointment.");
             }
         }
     }

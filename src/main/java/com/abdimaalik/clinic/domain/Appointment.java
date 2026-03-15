@@ -14,8 +14,7 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(UUID id, UUID patientId, UUID clinicianId, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
+    public Appointment(UUID patientId, UUID clinicianId, LocalDateTime startTime, LocalDateTime endTime) {
         this.patientId = patientId;
         this.clinicianId = clinicianId;
         this.startTime = startTime;

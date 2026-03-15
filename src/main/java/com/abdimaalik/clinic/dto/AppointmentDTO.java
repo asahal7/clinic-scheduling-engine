@@ -3,7 +3,6 @@ package com.abdimaalik.clinic.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 public class AppointmentDTO {
@@ -15,14 +14,13 @@ public class AppointmentDTO {
     private UUID clinicianId;
 
     @NotNull
-    @Future
     private LocalDateTime startTime;
 
     @NotNull
-    @Future
     private LocalDateTime endTime;
 
-    public AppointmentDTO() {}
+    public AppointmentDTO() {
+    }
 
     public UUID getPatientId() {
         return patientId;
