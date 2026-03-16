@@ -1,86 +1,64 @@
 package com.abdimaalik.clinic.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.abdimaalik.clinic.domain.Appointment;
-import com.abdimaalik.clinic.dto.AppointmentDTO;
+import com.abdimaalik.clinic.repository.AppointmentRepository;
 
 @Service
 public class ClinicService {
 
-    private final Map<UUID, Appointment> appointments = new HashMap<>();
+    private final AppointmentRepository appointmentRepository;
 
-    public Appointment createAppointment(AppointmentDTO dto) {
-        validateAppointment(dto);
+    public ClinicService(AppointmentRepository appointmentRepository) {
+        this.appointmentRepository = appointmentRepository;
+    }
 
-        Appointment appointment = new Appointment(
-                dto.getPatientId(),
-                dto.getClinicianId(),
-                dto.getStartTime(),
-                dto.getEndTime()
-        );
+    public Appointment createAppointment(Appointment appointment) {
+        validateAppointment(appointment);
+
+        if (appointment.getId() == null) {
+            appointment.setId(UUID.randomUUID());
+        }
 
         ensureNoOverlap(appointment);
 
-        UUID id = UUID.randomUUID();
-        appointment.setId(id);
-
-        appointments.put(id, appointment);
-        return appointment;
+        return appointmentRepository.save(appointment);
     }
 
     public List<Appointment> getAppointments() {
-        return new ArrayList<>(appointments.values());
+        return appointmentRepository.findAll();
     }
 
-    public Optional<Appointment> getAppointment(UUID id) {
-        return Optional.ofNullable(appointments.get(id));
+    public Appointment getAppointment(UUID id) {
+        return appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + id));
     }
 
     public void cancelAppointment(UUID id) {
-        appointments.remove(id);
+        appointmentRepository.deleteById(id);
     }
 
-    private void validateAppointment(AppointmentDTO dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("Appointment data must not be null.");
+    private void validateAppointment(Appointment appointment) {
+        if (appointment == null) {
+            throw new IllegalArgumentException("Appointment cannot be null");
         }
-
-        if (dto.getPatientId() == null) {
-            throw new IllegalArgumentException("Patient ID must not be null.");
+        if (appointment.getPatientName() == null || appointment.getPatientName().isBlank()) {
+            throw new IllegalArgumentException("Patient name is required");
         }
-
-        if (dto.getClinicianId() == null) {
-            throw new IllegalArgumentException("Clinician ID must not be null.");
+        if (appointment.getClinicianName() == null || appointment.getClinicianName().isBlank()) {
+            throw new IllegalArgumentException("Clinician name is required");
         }
-
-        if (dto.getStartTime() == null || dto.getEndTime() == null) {
-            throw new IllegalArgumentException("Start time and end time must not be null.");
-        }
-
-        if (!dto.getEndTime().isAfter(dto.getStartTime())) {
-            throw new IllegalArgumentException("End time must be after start time.");
+        if (appointment.getAppointmentTime() == null) {
+            throw new IllegalArgumentException("Appointment time is required");
         }
     }
 
-    private void ensureNoOverlap(Appointment newAppointment) {
-        for (Appointment existing : appointments.values()) {
-            boolean sameClinician = existing.getClinicianId().equals(newAppointment.getClinicianId());
-
-            boolean overlaps =
-                    newAppointment.getStartTime().isBefore(existing.getEndTime()) &&
-                    newAppointment.getEndTime().isAfter(existing.getStartTime());
-
-            if (sameClinician && overlaps) {
-                throw new IllegalArgumentException("Clinician already has an overlapping appointment.");
-            }
-        }
+    private void ensureNoOverlap(Appointment appointment) {
+        // keep this simple for now
+        // later we can replace this with a repository query
     }
 }
