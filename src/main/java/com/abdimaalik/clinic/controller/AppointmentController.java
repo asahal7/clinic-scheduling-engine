@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.abdimaalik.clinic.domain.Appointment;
 import com.abdimaalik.clinic.dto.AppointmentDTO;
-import com.abdimaalik.clinic.exception.NotFoundException;
 import com.abdimaalik.clinic.service.ClinicService;
 
 import jakarta.validation.Valid;
@@ -32,7 +31,12 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<Appointment> createAppointment(@Valid @RequestBody AppointmentDTO dto) {
-        Appointment created = clinicService.createAppointment(dto);
+        Appointment appointment = new Appointment();
+        appointment.setPatientName(dto.getPatientName());
+        appointment.setClinicianName(dto.getClinicianName());
+        appointment.setAppointmentTime(dto.getAppointmentTime());
+
+        Appointment created = clinicService.createAppointment(appointment);
 
         return ResponseEntity
                 .created(URI.create("/appointments/" + created.getId()))
@@ -46,18 +50,13 @@ public class AppointmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Appointment> getAppointmentById(@PathVariable UUID id) {
-        Appointment appointment = clinicService.getAppointment(id)
-                .orElseThrow(() -> new NotFoundException("Appointment not found with id: " + id));
-
+        Appointment appointment = clinicService.getAppointment(id);
         return ResponseEntity.ok(appointment);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelAppointment(@PathVariable UUID id) {
-        Appointment appointment = clinicService.getAppointment(id)
-                .orElseThrow(() -> new NotFoundException("Appointment not found with id: " + id));
-
-        clinicService.cancelAppointment(appointment.getId());
+        clinicService.cancelAppointment(id);
         return ResponseEntity.noContent().build();
     }
 }

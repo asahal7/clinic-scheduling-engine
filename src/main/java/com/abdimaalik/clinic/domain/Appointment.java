@@ -3,22 +3,22 @@ package com.abdimaalik.clinic.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "appointments")
 public class Appointment {
 
+    @Id
     private UUID id;
-    private UUID patientId;
-    private UUID clinicianId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+
+    private String patientName;
+    private String clinicianName;
+    private LocalDateTime appointmentTime;
 
     public Appointment() {
-    }
-
-    public Appointment(UUID patientId, UUID clinicianId, LocalDateTime startTime, LocalDateTime endTime) {
-        this.patientId = patientId;
-        this.clinicianId = clinicianId;
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
 
     public UUID getId() {
@@ -29,35 +29,27 @@ public class Appointment {
         this.id = id;
     }
 
-    public UUID getPatientId() {
-        return patientId;
+    public String getPatientName() {
+        return patientName;
     }
 
-    public void setPatientId(UUID patientId) {
-        this.patientId = patientId;
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 
-    public UUID getClinicianId() {
-        return clinicianId;
+    public String getClinicianName() {
+        return clinicianName;
     }
 
-    public void setClinicianId(UUID clinicianId) {
-        this.clinicianId = clinicianId;
+    public void setClinicianName(String clinicianName) {
+        this.clinicianName = clinicianName;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public LocalDateTime getAppointmentTime() {
+        return appointmentTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setAppointmentTime(LocalDateTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 }
