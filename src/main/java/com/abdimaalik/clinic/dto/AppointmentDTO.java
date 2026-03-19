@@ -3,39 +3,39 @@ package com.abdimaalik.clinic.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotNull;
-
 public class AppointmentDTO {
 
-    @NotNull
-    private UUID patientId;
-
-    @NotNull
-    private UUID clinicianId;
-
-    @NotNull
+    private UUID id;
+    private String patientName;
+    private String clinicianName;
     private LocalDateTime startTime;
-
-    @NotNull
     private LocalDateTime endTime;
 
     public AppointmentDTO() {
     }
 
-    public UUID getPatientId() {
-        return patientId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setPatientId(UUID patientId) {
-        this.patientId = patientId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public UUID getClinicianId() {
-        return clinicianId;
+    public String getPatientName() {
+        return patientName;
     }
 
-    public void setClinicianId(UUID clinicianId) {
-        this.clinicianId = clinicianId;
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public String getClinicianName() {
+        return clinicianName;
+    }
+
+    public void setClinicianName(String clinicianName) {
+        this.clinicianName = clinicianName;
     }
 
     public LocalDateTime getStartTime() {
