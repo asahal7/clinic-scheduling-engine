@@ -1,18 +1,23 @@
 package com.abdimaalik.clinic.controller;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.abdimaalik.clinic.domain.Appointment;
+import com.abdimaalik.clinic.domain.AppointmentStatus;
 import com.abdimaalik.clinic.dto.AppointmentDTO;
+import com.abdimaalik.clinic.dto.AppointmentResponseDTO;
 import com.abdimaalik.clinic.service.ClinicService;
 
 @RestController
@@ -26,27 +31,41 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment scheduleAppointment(@RequestBody AppointmentDTO dto) {
+    public AppointmentResponseDTO scheduleAppointment(@RequestBody AppointmentDTO dto) {
         return clinicService.scheduleAppointment(dto);
     }
 
     @GetMapping
-    public List<Appointment> getAllAppointments() {
-        return clinicService.getAllAppointments();
+    public Page<AppointmentResponseDTO> getAppointments(
+            @RequestParam(required = false) String clinicianName,
+            @RequestParam(required = false) String patientName,
+            @RequestParam(required = false) AppointmentStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "startTime") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return clinicService.getAppointments(clinicianName, patientName, status, pageable);
     }
 
     @PatchMapping("/{id}/cancel")
-    public Appointment cancelAppointment(@PathVariable UUID id) {
+    public AppointmentResponseDTO cancelAppointment(@PathVariable UUID id) {
         return clinicService.cancelAppointment(id);
     }
 
     @PatchMapping("/{id}/complete")
-    public Appointment completeAppointment(@PathVariable UUID id) {
+    public AppointmentResponseDTO completeAppointment(@PathVariable UUID id) {
         return clinicService.completeAppointment(id);
     }
 
     @PatchMapping("/{id}/no-show")
-    public Appointment markNoShow(@PathVariable UUID id) {
+    public AppointmentResponseDTO markNoShow(@PathVariable UUID id) {
         return clinicService.markNoShow(id);
     }
 }

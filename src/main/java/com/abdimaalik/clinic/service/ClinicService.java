@@ -1,14 +1,16 @@
 package com.abdimaalik.clinic.service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.abdimaalik.clinic.domain.Appointment;
 import com.abdimaalik.clinic.domain.AppointmentStatus;
 import com.abdimaalik.clinic.dto.AppointmentDTO;
+import com.abdimaalik.clinic.dto.AppointmentResponseDTO;
 import com.abdimaalik.clinic.repository.AppointmentRepository;
 
 @Service
@@ -20,7 +22,7 @@ public class ClinicService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public Appointment scheduleAppointment(AppointmentDTO dto) {
+    public AppointmentResponseDTO scheduleAppointment(AppointmentDTO dto) {
         validateAppointment(dto);
         validateNoOverlap(dto);
 
@@ -33,10 +35,10 @@ public class ClinicService {
         appointment.setFee(dto.getFee());
         appointment.setStatus(AppointmentStatus.CONFIRMED);
 
-        return appointmentRepository.save(appointment);
+        return toResponseDTO(appointmentRepository.save(appointment));
     }
 
-    public Appointment cancelAppointment(UUID appointmentId) {
+    public AppointmentResponseDTO cancelAppointment(UUID appointmentId) {
         Appointment appointment = getAppointmentOrThrow(appointmentId);
 
         if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
@@ -52,10 +54,10 @@ public class ClinicService {
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
-        return appointmentRepository.save(appointment);
+        return toResponseDTO(appointmentRepository.save(appointment));
     }
 
-    public Appointment completeAppointment(UUID appointmentId) {
+    public AppointmentResponseDTO completeAppointment(UUID appointmentId) {
         Appointment appointment = getAppointmentOrThrow(appointmentId);
 
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
@@ -71,10 +73,10 @@ public class ClinicService {
         }
 
         appointment.setStatus(AppointmentStatus.COMPLETED);
-        return appointmentRepository.save(appointment);
+        return toResponseDTO(appointmentRepository.save(appointment));
     }
 
-    public Appointment markNoShow(UUID appointmentId) {
+    public AppointmentResponseDTO markNoShow(UUID appointmentId) {
         Appointment appointment = getAppointmentOrThrow(appointmentId);
 
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
@@ -90,11 +92,44 @@ public class ClinicService {
         }
 
         appointment.setStatus(AppointmentStatus.NO_SHOW);
-        return appointmentRepository.save(appointment);
+        return toResponseDTO(appointmentRepository.save(appointment));
     }
 
-    public List<Appointment> getAllAppointments() {
-        return appointmentRepository.findAll();
+    public Page<AppointmentResponseDTO> getAppointments(String clinicianName,
+                                                        String patientName,
+                                                        AppointmentStatus status,
+                                                        Pageable pageable) {
+        Page<Appointment> appointments;
+
+        if (clinicianName != null && !clinicianName.isBlank() && status != null) {
+            appointments = appointmentRepository.findByClinicianNameContainingIgnoreCaseAndStatus(
+                    clinicianName.trim(),
+                    status,
+                    pageable
+            );
+        } else if (patientName != null && !patientName.isBlank() && status != null) {
+            appointments = appointmentRepository.findByPatientNameContainingIgnoreCaseAndStatus(
+                    patientName.trim(),
+                    status,
+                    pageable
+            );
+        } else if (clinicianName != null && !clinicianName.isBlank()) {
+            appointments = appointmentRepository.findByClinicianNameContainingIgnoreCase(
+                    clinicianName.trim(),
+                    pageable
+            );
+        } else if (patientName != null && !patientName.isBlank()) {
+            appointments = appointmentRepository.findByPatientNameContainingIgnoreCase(
+                    patientName.trim(),
+                    pageable
+            );
+        } else if (status != null) {
+            appointments = appointmentRepository.findByStatus(status, pageable);
+        } else {
+            appointments = appointmentRepository.findAll(pageable);
+        }
+
+        return appointments.map(this::toResponseDTO);
     }
 
     private Appointment getAppointmentOrThrow(UUID appointmentId) {
@@ -150,5 +185,17 @@ public class ClinicService {
                     "Appointment overlaps with an existing active appointment for this clinician."
             );
         }
+    }
+
+    private AppointmentResponseDTO toResponseDTO(Appointment appointment) {
+        return new AppointmentResponseDTO(
+                appointment.getId(),
+                appointment.getPatientName(),
+                appointment.getClinicianName(),
+                appointment.getStartTime(),
+                appointment.getEndTime(),
+                appointment.getFee(),
+                appointment.getStatus()
+        );
     }
 }
