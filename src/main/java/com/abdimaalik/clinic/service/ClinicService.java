@@ -1,6 +1,7 @@
 package com.abdimaalik.clinic.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -80,5 +81,8 @@ public class ClinicService {
                     "Appointment overlaps with an existing appointment for this clinician."
             );
         }
+    }
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
     }
 }
