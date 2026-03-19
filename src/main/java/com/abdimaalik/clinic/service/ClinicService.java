@@ -1,13 +1,12 @@
 package com.abdimaalik.clinic.service;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.abdimaalik.clinic.domain.Appointment;
 import com.abdimaalik.clinic.dto.AppointmentDTO;
-import com.abdimaalik.clinic.exception.AppointmentConflictException;
 import com.abdimaalik.clinic.repository.AppointmentRepository;
 
 @Service
@@ -19,22 +18,19 @@ public class ClinicService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public Appointment createAppointment(AppointmentDTO dto) {
+    public Appointment scheduleAppointment(AppointmentDTO dto) {
         validateAppointment(dto);
-        ensureNoClinicianOverlap(dto);
+        validateNoOverlap(dto);
 
         Appointment appointment = new Appointment();
-        appointment.setId(dto.getId() != null ? dto.getId() : UUID.randomUUID());
-        appointment.setPatientName(dto.getPatientName());
-        appointment.setClinicianName(dto.getClinicianName());
+        appointment.setId(UUID.randomUUID());
+        appointment.setPatientName(dto.getPatientName().trim());
+        appointment.setClinicianName(dto.getClinicianName().trim());
         appointment.setStartTime(dto.getStartTime());
         appointment.setEndTime(dto.getEndTime());
+        appointment.setFee(dto.getFee());
 
         return appointmentRepository.save(appointment);
-    }
-
-    public List<Appointment> getAllAppointments() {
-        return appointmentRepository.findAll();
     }
 
     private void validateAppointment(AppointmentDTO dto) {
@@ -61,19 +57,27 @@ public class ClinicService {
         if (!dto.getStartTime().isBefore(dto.getEndTime())) {
             throw new IllegalArgumentException("Start time must be before end time.");
         }
+
+        if (dto.getFee() == null) {
+            throw new IllegalArgumentException("Fee must not be null.");
+        }
+
+        if (dto.getFee().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Fee must be greater than zero.");
+        }
     }
 
-    private void ensureNoClinicianOverlap(AppointmentDTO dto) {
-        boolean overlapExists =
+    private void validateNoOverlap(AppointmentDTO dto) {
+        boolean overlaps =
                 appointmentRepository.existsByClinicianNameAndStartTimeLessThanAndEndTimeGreaterThan(
-                        dto.getClinicianName(),
+                        dto.getClinicianName().trim(),
                         dto.getEndTime(),
                         dto.getStartTime()
                 );
 
-        if (overlapExists) {
-            throw new AppointmentConflictException(
-                    "Clinician already has an overlapping appointment."
+        if (overlaps) {
+            throw new IllegalArgumentException(
+                    "Appointment overlaps with an existing appointment for this clinician."
             );
         }
     }

@@ -1,8 +1,10 @@
 package com.abdimaalik.clinic.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -18,6 +20,9 @@ public class Appointment {
     private String clinicianName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal fee;
 
     public Appointment() {
     }
@@ -60,5 +65,13 @@ public class Appointment {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
     }
 }

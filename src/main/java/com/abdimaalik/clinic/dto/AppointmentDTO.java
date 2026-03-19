@@ -1,25 +1,29 @@
 package com.abdimaalik.clinic.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class AppointmentDTO {
 
-    private UUID id;
     private String patientName;
     private String clinicianName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private BigDecimal fee;
 
     public AppointmentDTO() {
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
+    public AppointmentDTO(String patientName,
+                          String clinicianName,
+                          LocalDateTime startTime,
+                          LocalDateTime endTime,
+                          BigDecimal fee) {
+        this.patientName = patientName;
+        this.clinicianName = clinicianName;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.fee = fee;
     }
 
     public String getPatientName() {
@@ -52,5 +56,13 @@ public class AppointmentDTO {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
     }
 }

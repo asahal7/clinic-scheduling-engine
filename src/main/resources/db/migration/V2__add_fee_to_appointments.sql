@@ -1,0 +1,2 @@
+ALTER TABLE appointments
+ADD COLUMN fee DECIMAL(10,2) NOT NULL;
