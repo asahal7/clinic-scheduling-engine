@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -23,6 +25,10 @@ public class Appointment {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal fee;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentStatus status;
 
     public Appointment() {
     }
@@ -73,5 +79,13 @@ public class Appointment {
 
     public void setFee(BigDecimal fee) {
         this.fee = fee;
+    }
+
+    public AppointmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AppointmentStatus status) {
+        this.status = status;
     }
 }
