@@ -1,0 +1,27 @@
+services:
+  clinic-app:
+    build: .
+    container_name: clinic-scheduling-app
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/clinicdb
+      SPRING_DATASOURCE_USERNAME: clinicuser
+      SPRING_DATASOURCE_PASSWORD: clinicpass
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: clinic-postgres
+    environment:
+      POSTGRES_DB: clinicdb
+      POSTGRES_USER: clinicuser
+      POSTGRES_PASSWORD: clinicpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - clinic_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  clinic_postgres_data:
